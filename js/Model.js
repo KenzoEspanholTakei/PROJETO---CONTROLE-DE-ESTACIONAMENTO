@@ -27,6 +27,20 @@ export default class Model {
         } else {
             this.veiculos = [];
         }
+
+        // Carrega Faturamento do Dia
+        const faturamentoSalvo = localStorage.getItem('estacionamento_faturamento');
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        if (faturamentoSalvo) {
+            const dadosFat = JSON.parse(faturamentoSalvo);
+            if (dadosFat.data === hoje) {
+                this.faturamentoHoje = dadosFat.valor;
+            } else {
+                this.faturamentoHoje = 0;
+            }
+        } else {
+            this.faturamentoHoje = 0;
+        }
     }
 
     salvarConfig(config) {
@@ -76,5 +90,18 @@ export default class Model {
 
     obterVeiculos() {
         return this.veiculos;
+    }
+
+    adicionarFaturamento(valor) {
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        this.faturamentoHoje += valor;
+        localStorage.setItem('estacionamento_faturamento', JSON.stringify({
+            data: hoje,
+            valor: this.faturamentoHoje
+        }));
+    }
+
+    obterFaturamento() {
+        return this.faturamentoHoje;
     }
 }

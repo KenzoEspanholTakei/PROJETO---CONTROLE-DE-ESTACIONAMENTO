@@ -7,10 +7,13 @@ export default class Controller {
         this.view.bindSalvarConfig(this.handleSalvarConfig.bind(this));
         this.view.bindAdicionarVeiculo(this.handleAdicionarVeiculo.bind(this));
         this.view.bindRemoverVeiculo(this.handleIniciarCheckout.bind(this));
+        this.view.bindFiltro(this.handleFiltro.bind(this));
 
         // Inicializa tela
         this.view.preencherConfiguracoes(this.model.obterConfig());
+        this.filtroAtual = '';
         this.atualizarLista();
+        this.atualizarDashboard();
     }
 
     handleSalvarConfig(config) {
@@ -22,9 +25,21 @@ export default class Controller {
             this.model.adicionarVeiculo(placa, tipo, modelo, dataEntrada);
             this.view.limparFormulario();
             this.atualizarLista();
+            this.atualizarDashboard();
         } catch (erro) {
             this.view.exibirErro(erro.message);
         }
+    }
+
+    handleFiltro(termo) {
+        this.filtroAtual = termo.toUpperCase();
+        this.atualizarLista();
+    }
+
+    atualizarDashboard() {
+        const veiculos = this.model.obterVeiculos().length;
+        const faturamento = this.model.obterFaturamento();
+        this.view.atualizarDashboard(veiculos, faturamento);
     }
 
     calcularEstadia(veiculo, dataSaida) {
@@ -95,16 +110,21 @@ export default class Controller {
                 // Função de cálculo repassada para a View
                 (v, dataSaida) => this.calcularEstadia(v, dataSaida),
                 // Callback de confirmação real
-                () => {
+                (valorPago) => {
+                    this.model.adicionarFaturamento(valorPago);
                     this.model.removerVeiculo(id);
                     this.atualizarLista();
+                    this.atualizarDashboard();
                 }
             );
         }
     }
 
     atualizarLista() {
-        const veiculos = this.model.obterVeiculos();
+        let veiculos = this.model.obterVeiculos();
+        if (this.filtroAtual) {
+            veiculos = veiculos.filter(v => v.placa.includes(this.filtroAtual));
+        }
         this.view.exibirVeiculos(veiculos);
     }
 }

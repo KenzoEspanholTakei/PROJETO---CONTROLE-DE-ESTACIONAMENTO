@@ -20,6 +20,7 @@ export default class View {
         // Modal Recibo
         this.modal = document.getElementById('receipt-modal');
         this.modalContent = this.modal ? this.modal.querySelector('div') : null;
+        this.btnShareWhatsapp = document.getElementById('btn-share-whatsapp');
         this.btnCloseModal = document.getElementById('btn-close-modal');
         this.btnCancelModal = document.getElementById('btn-cancel-modal');
         this.receiptPlaca = document.getElementById('receipt-placa');
@@ -28,6 +29,11 @@ export default class View {
         this.receiptDataSaidaInput = document.getElementById('receipt-data-saida');
         this.receiptTempo = document.getElementById('receipt-tempo');
         this.receiptValor = document.getElementById('receipt-valor');
+
+        // Dashboard & Filtro
+        this.dashVeiculos = document.getElementById('dash-veiculos');
+        this.dashFaturamento = document.getElementById('dash-faturamento');
+        this.filtroPlaca = document.getElementById('filtro-placa');
 
         this._inicializarMascaraPlaca();
         this.preencherDataEntradaAtual();
@@ -99,6 +105,17 @@ export default class View {
         });
     }
 
+    bindFiltro(handler) {
+        this.filtroPlaca.addEventListener('input', (e) => {
+            handler(e.target.value);
+        });
+    }
+
+    atualizarDashboard(qtdVeiculos, faturamento) {
+        if(this.dashVeiculos) this.dashVeiculos.textContent = qtdVeiculos;
+        if(this.dashFaturamento) this.dashFaturamento.textContent = `R$ ${faturamento.toFixed(2).replace('.', ',')}`;
+    }
+
     limparFormulario() {
         this.placaInput.value = '';
         this.modeloInput.value = '';
@@ -156,11 +173,23 @@ export default class View {
         // Remover handlers antigos para evitar memory leaks
         this.btnCloseModal.onclick = () => {
             this.fecharModal();
-            onConfirm();
+            const dataSaida = new Date(this.receiptDataSaidaInput.value);
+            const calculo = handlerCalculo(veiculo, dataSaida);
+            onConfirm(calculo.valorTotal);
         };
 
         this.btnCancelModal.onclick = () => {
             this.fecharModal();
+        };
+
+        this.btnShareWhatsapp.onclick = () => {
+            const dataSaida = new Date(this.receiptDataSaidaInput.value);
+            const calculo = handlerCalculo(veiculo, dataSaida);
+            if (calculo.erro) return;
+
+            const texto = `*Recibo de Estacionamento*\n\nPlaca: ${veiculo.placa}\nModelo: ${veiculo.tipo.toUpperCase()} - ${veiculo.modelo}\nEntrada: ${entradaFormatada}\nSaída: ${dataSaida.toLocaleString('pt-BR')}\nTempo: ${calculo.tempoText}\n\n*Total: ${calculo.valorText}*\n\nObrigado!`;
+            const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
         };
     }
 

@@ -1,0 +1,23 @@
+{
+  "name": "Controle de Estacionamento",
+  "short_name": "Estacionamento",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e3c72",
+  "theme_color": "#1e3c72",
+  "description": "Aplicativo para controle de pátio e faturamento de estacionamento",
+  "icons": [
+    {
+      "src": "icon-512x512.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
